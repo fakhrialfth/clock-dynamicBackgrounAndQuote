@@ -1,25 +1,92 @@
-import logo from './logo.svg';
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 import './App.css';
 
-function App() {
+const getCurrentTime = () => {
+  return new Date().toLocaleTimeString("in-ID");
+};
+
+export default function App() {
+  const [time, setTime] = useState(() => getCurrentTime());
+  const [background, setBackground] = useState();
+  const [textColor, setTextColor] = useState();
+  const [quote, setQuote] = useState("");
+  const [author, setAuthor] = useState("");
+  const [hello, setHello] = useState("");
+
+  useEffect(() => {
+    const fetchQuote = () => {
+      axios({
+        method: "GET",
+        url: "https://api.quotable.io/random"
+      }).then((result) => {
+        setAuthor(result.data.author);
+        setQuote(result.data.content);
+      });
+    };
+
+    fetchQuote();
+
+    const myQ = setInterval(() => {
+      fetchQuote();
+    }, 60000 * 15);
+
+    return () => {
+      clearInterval(myQ);
+    };
+  }, []);
+
+  useEffect(() => {
+    const myIn = setInterval(() => {
+      setTime(getCurrentTime());
+      checkTimeAndUpdateTheme();
+    }, 1000);
+
+    return () => {
+      clearInterval(myIn);
+    };
+  }, []);
+
+  const checkTimeAndUpdateTheme = () => {
+    if ( 
+      (parseInt(time.substring(0, 2), 10) >= 19 &&
+      parseInt(time.substring(0, 2), 10) <= 6)
+    ) {
+      setHello("Good Night")
+      setBackground("url(https://wallpaperaccess.com/full/6243096.jpg)");
+      setTextColor("white");
+    } else if (
+      parseInt(time.substring(0, 2), 10) >= 6 &&
+      parseInt(time.substring(0, 2), 10) <= 12
+    ) {
+      setHello("Good Morning")
+      setBackground("url(https://p0.pikist.com/photos/813/956/countryside-daylight-grass-hd-wallpaper-hill-landscape-meadow-mountain-nature-wallpaper-outdoors.jpg)");
+      setTextColor("white");
+    } else if (
+      parseInt(time.substring(0, 2), 10) >= 12 &&
+      parseInt(time.substring(0, 2), 10) <= 17
+    ) {
+      setHello("Good Afternoon")
+      setBackground("url(https://p0.pikist.com/photos/813/956/countryside-daylight-grass-hd-wallpaper-hill-landscape-meadow-mountain-nature-wallpaper-outdoors.jpg)");
+      setTextColor("white");
+    } else if (
+      parseInt(time.substring(0, 2), 10) >= 17 &&
+      parseInt(time.substring(0, 2), 10) <= 19
+    ) {
+      setHello("Good Evening")
+      setBackground("url(https://images.pexels.com/photos/2386144/pexels-photo-2386144.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500)");
+      setTextColor("white");
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" style={{ backgroundImage: background }}>
+      <h1 style={{ color: textColor }}>{hello}</h1>
+      <h2 style={{ fontSize: "3rem", color: textColor }}>{time}</h2>
+      <h2 style={{ color: textColor }}>{quote}</h2>
+      <h3 style={{ color: textColor }}>- {author}</h3>
     </div>
   );
 }
-
-export default App;
